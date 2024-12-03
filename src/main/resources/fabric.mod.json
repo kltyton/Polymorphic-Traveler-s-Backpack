@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "polymorphic_travelersbackpack",
+  "version": "${version}",
+  "name": "Polymorphic TravelersBackpack",
+  "description": "Traveler's Backpack",
+  "authors": [
+    "kltyton"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/polymorphic_travelersbackpack/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.kltyton.polymorphic_travelersbackpack.client.Polymorphic_travelersbackpackClient"
+    ],
+    "main": [
+      "com.kltyton.polymorphic_travelersbackpack.Polymorphic_travelersbackpack"
+    ]
+  },
+  "mixins": [
+    "polymorphic_travelersbackpack.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
