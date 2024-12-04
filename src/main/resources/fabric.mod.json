@@ -14,9 +14,6 @@
   "entrypoints": {
     "client": [
       "com.kltyton.polymorphic_travelersbackpack.client.Polymorphic_travelersbackpackClient"
-    ],
-    "main": [
-      "com.kltyton.polymorphic_travelersbackpack.Polymorphic_travelersbackpack"
     ]
   },
   "mixins": [
