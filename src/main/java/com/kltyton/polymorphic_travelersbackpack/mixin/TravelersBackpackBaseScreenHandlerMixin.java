@@ -1,44 +1,33 @@
 package com.kltyton.polymorphic_travelersbackpack.mixin;
 
 import com.illusivesoulworks.polymorph.common.crafting.RecipeSelection;
-import com.tiviacz.travelersbackpack.inventory.screen.TravelersBackpackBaseScreenHandler;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipe;
+import com.tiviacz.travelersbackpack.inventory.menu.BackpackBaseMenu;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Optional;
 
-@Mixin(TravelersBackpackBaseScreenHandler.class)
-public class TravelersBackpackBaseScreenHandlerMixin {
-    @Inject(method = "slotChangedCraftingGrid", at = @At("HEAD"), cancellable = true
-    )
-    private static void onSlotChangedCraftingGrid(AbstractContainerMenu handler, Level world, Player player, CraftingContainer craftMatrix, ResultContainer craftResult, CallbackInfo ci) {
-        if (!world.isClientSide) {
-            RecipeType<CraftingRecipe> recipeType = RecipeType.CRAFTING;
-            ServerPlayer serverPlayerEntity = (ServerPlayer)player;
-            ItemStack itemStack = ItemStack.EMPTY;
-            Optional<CraftingRecipe> recipe = RecipeSelection.getPlayerRecipe(handler, recipeType, craftMatrix, world, player);
-            ItemStack itemStack2;
-            CraftingRecipe craftingRecipe;
-            if (recipe.isPresent() && craftResult.setRecipeUsed(world, serverPlayerEntity, craftingRecipe = recipe.get()) && (itemStack2 = craftingRecipe.assemble(craftMatrix, world.registryAccess())).isItemEnabled(world.enabledFeatures())) {
-                itemStack = itemStack2;
-            }
+@Mixin(BackpackBaseMenu.class)
+public abstract class TravelersBackpackBaseScreenHandlerMixin {
 
-            craftResult.setItem(0, itemStack);
-            handler.setRemoteSlot(0, itemStack);
-            serverPlayerEntity.connection.send(new ClientboundContainerSetSlotPacket(handler.containerId, handler.incrementStateId(), 0, itemStack));
-        }
-        ci.cancel();
+    @Redirect(
+            method = "slotChangedCraftingGrid",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRecipeFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;Lnet/minecraft/world/level/Level;)Ljava/util/Optional;"
+            )
+    )
+    private <C extends Container, T extends Recipe<C>> Optional<T> redirectGetRecipeFor(
+            RecipeManager instance, RecipeType<T> recipeType, C container, Level level) {
+
+        // 根据需要使用 RecipeSelection.getPlayerRecipe 或其他方法
+        BackpackBaseMenu menu = (BackpackBaseMenu) (Object) this; // 获取当前实例
+        return RecipeSelection.getPlayerRecipe(menu, recipeType, container, level, menu.slots);
     }
 }
